@@ -1,0 +1,27 @@
+import { pgTable, serial, integer, text, timestamp, boolean, unique } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+import { usersTable } from "./users";
+import { carsTable } from "./cars";
+
+export const carShowsTable = pgTable("car_shows", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  theme: text("theme").notNull(),
+  votes: integer("votes").notNull().default(0),
+  weekOf: text("week_of").notNull(),
+  isWeeklyChampion: boolean("is_weekly_champion").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const showVotesTable = pgTable("show_votes", {
+  id: serial("id").primaryKey(),
+  showId: integer("show_id").notNull().references(() => carShowsTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [unique().on(t.showId, t.userId)]);
+
+export const insertCarShowSchema = createInsertSchema(carShowsTable).omit({ id: true, createdAt: true, votes: true, isWeeklyChampion: true });
+export type InsertCarShow = z.infer<typeof insertCarShowSchema>;
+export type CarShow = typeof carShowsTable.$inferSelect;
