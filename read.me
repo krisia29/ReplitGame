@@ -1,0 +1,31 @@
+Exotic Car Modifications: Race & Showcase
+A full-stack 3D browser game where players build, customize, and race exotic vehicles against a global community.
+
+Run & Operate
+pnpm --filter @workspace/api-server run dev — API server (port 8080)
+pnpm --filter @workspace/3d-game run dev — Game frontend (port 24982)
+pnpm run typecheck — full typecheck across all packages
+pnpm --filter @workspace/api-spec run codegen — regenerate API hooks from OpenAPI spec
+pnpm --filter @workspace/db run push — push DB schema changes (dev only)
+Required env: DATABASE_URL, SESSION_SECRET
+Stack
+pnpm workspaces, Node.js 24, TypeScript 5.9
+Frontend: React + Vite + React Three Fiber + Three.js
+API: Express 5 + express-session + connect-pg-simple
+Auth: Session-based (bcryptjs)
+DB: PostgreSQL + Drizzle ORM
+Validation: Zod (v4), drizzle-zod
+API codegen: Orval
+Build: esbuild
+Where things live
+lib/api-spec/openapi.yaml — OpenAPI contract (source of truth)
+lib/db/src/schema/ — Drizzle table definitions
+artifacts/api-server/src/routes/ — Express route handlers
+artifacts/api-server/src/data/catalog.ts — Static car/customization catalog
+artifacts/3d-game/src/pages/ — All game pages
+artifacts/3d-game/src/components/car-model.tsx — Programmatic 3D car model
+Gotchas
+Always run codegen after OpenAPI spec changes
+Session cookies require credentials: "include" on all fetch calls
+CORS must allow credentials — already set in app.ts
+Car stats are computed from modelId + tuneId on every create/update — don't store manually
