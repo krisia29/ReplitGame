@@ -1,0 +1,35 @@
+import { pgTable, text, serial, integer, timestamp, real } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+import { usersTable } from "./users";
+import { carsTable } from "./cars";
+
+export const racesTable = pgTable("races", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  trackName: text("track_name").notNull(),
+  difficulty: text("difficulty").notNull().default("beginner"),
+  status: text("status").notNull().default("active"),
+  maxPlayers: integer("max_players").notNull().default(8),
+  participantCount: integer("participant_count").notNull().default(0),
+  prizePoints: integer("prize_points").notNull().default(100),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const raceResultsTable = pgTable("race_results", {
+  id: serial("id").primaryKey(),
+  raceId: integer("race_id").notNull().references(() => racesTable.id),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  carId: integer("car_id").notNull().references(() => carsTable.id, { onDelete: "cascade" }),
+  position: integer("position").notNull(),
+  finishTime: real("finish_time").notNull(),
+  pointsEarned: integer("points_earned").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertRaceSchema = createInsertSchema(racesTable).omit({ id: true, createdAt: true, participantCount: true });
+export const insertRaceResultSchema = createInsertSchema(raceResultsTable).omit({ id: true, createdAt: true });
+export type InsertRace = z.infer<typeof insertRaceSchema>;
+export type InsertRaceResult = z.infer<typeof insertRaceResultSchema>;
+export type Race = typeof racesTable.$inferSelect;
+export type RaceResult = typeof raceResultsTable.$inferSelect;
