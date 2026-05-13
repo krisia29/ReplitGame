@@ -1,0 +1,22 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import authRouter from "./auth";
+import carsRouter from "./cars";
+import customizationsRouter from "./customizations";
+import racesRouter from "./races";
+import leaderboardRouter from "./leaderboard";
+import showsRouter from "./shows";
+import communityRouter from "./community";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use(authRouter);
+router.use(carsRouter);
+router.use(customizationsRouter);
+router.use(racesRouter);
+router.use(leaderboardRouter);
+router.use(showsRouter);
+router.use(communityRouter);
+
+export default router;
