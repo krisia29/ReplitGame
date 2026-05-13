@@ -1,0 +1,28 @@
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+import { usersTable } from "./users";
+
+export const carsTable = pgTable("cars", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  modelId: text("model_id").notNull(),
+  name: text("name").notNull(),
+  paintColor: text("paint_color").notNull().default("#FF0000"),
+  wrapId: text("wrap_id"),
+  wheelId: text("wheel_id").notNull().default("spoke_silver"),
+  tuneId: text("tune_id").notNull().default("street_basic"),
+  // Computed/cached stats stored as JSON-like separate cols
+  statSpeed: integer("stat_speed").notNull().default(50),
+  statAcceleration: integer("stat_acceleration").notNull().default(50),
+  statHandling: integer("stat_handling").notNull().default(50),
+  statBraking: integer("stat_braking").notNull().default(50),
+  totalRaces: integer("total_races").notNull().default(0),
+  totalWins: integer("total_wins").notNull().default(0),
+  showPoints: integer("show_points").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCarSchema = createInsertSchema(carsTable).omit({ id: true, createdAt: true, totalRaces: true, totalWins: true, showPoints: true });
+export type InsertCar = z.infer<typeof insertCarSchema>;
+export type Car = typeof carsTable.$inferSelect;
